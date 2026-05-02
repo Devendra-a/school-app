@@ -1,0 +1,58 @@
+-- ============ SCHEMA ============
+
+CREATE TABLE IF NOT EXISTS admins (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    phone VARCHAR(15) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS classes (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    section VARCHAR(10) DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS teachers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    phone VARCHAR(15) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    subject VARCHAR(100) DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS students (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    roll_no VARCHAR(20) NOT NULL,
+    parent_phone VARCHAR(15) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    class_id INTEGER REFERENCES classes(id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS tests (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    class_id INTEGER REFERENCES classes(id) ON DELETE CASCADE,
+    max_marks INTEGER NOT NULL DEFAULT 100,
+    teacher_id INTEGER REFERENCES teachers(id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS marks (
+    id SERIAL PRIMARY KEY,
+    test_id INTEGER REFERENCES tests(id) ON DELETE CASCADE,
+    student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
+    marks INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(test_id, student_id)
+);
+
+-- ============ SEED DATA ============
+-- Default admin (phone: 9999999999, password: admin123)
+INSERT INTO admins (name, phone, password) VALUES
+('Admin', '9999999999', 'pbkdf2:sha256:600000$salt$hash')
+ON CONFLICT DO NOTHING;
